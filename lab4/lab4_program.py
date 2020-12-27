@@ -42,7 +42,6 @@ def coo_gauss_elimination(N, coo):
 
 
 def csc_gauss_elimination(N, colptr, row, data):
-    NNZ = len(data)
     # traverse over diagonal
     for k in range(N - 1):
         col_offset = colptr[k]
@@ -54,7 +53,6 @@ def csc_gauss_elimination(N, colptr, row, data):
         # get info about non-zero values in column under diagonal position
         data_to_delete = data[col_offset + 1:next_col_offset]
         row_to_delete = row[col_offset + 1:next_col_offset]
-        to_delete_start = col_offset + 1
 
         if len(data_to_delete) == 0:  # nothing will be deleted, here's nothing to do anything more
             continue
@@ -64,6 +62,7 @@ def csc_gauss_elimination(N, colptr, row, data):
             # find non zero values in k row
 
             j_column_data = data[colptr[j]:colptr[j + 1]]
+
             j_rows = row[colptr[j]:colptr[j + 1]]
 
             # k row not in j_rows means that A[k,j] = 0 and there's nothing to do anything more
@@ -73,13 +72,15 @@ def csc_gauss_elimination(N, colptr, row, data):
             akj = j_column_data[np.where(j_rows == k)[0][0]]
 
             for d_row, d_data in zip(row_to_delete, data_to_delete):
-                if d_row not in j_rows:  # "0 - x" situation
-                    i = colptr[j + 1]
+                if d_row not in row[colptr[j]:colptr[j + 1]]:  # "0 - x" situation
+                    res_idx = np.where(row[colptr[j]:colptr[j + 1]] > d_row)[0]
+
+                    i = (colptr[j] + res_idx[0]) if len(res_idx) != 0 else colptr[j + 1]
                     data = np.concatenate((data[:i, ], np.zeros(1), data[i:, ]))
                     row = np.concatenate((row[:i, ], np.array([d_row]), row[i:, ]))
                     colptr += (colptr >= i) * 1
                 else:
-                    i = colptr[j] + np.where(j_rows == d_row)[0][0]
+                    i = colptr[j] + np.where(row[colptr[j]:colptr[j + 1]] == d_row)[0][0]
 
                 data[i] -= akj * (d_data / akk)
         # finally delete values from row

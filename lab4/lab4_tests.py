@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix
 from lab4_program import csc_gauss_elimination, coo_gauss_elimination
-
+import scipy.sparse.linalg as la
 
 def matrix_to_coo(matrix):
     a = coo_matrix(matrix)
@@ -28,7 +28,7 @@ class CSCTestCase(unittest.TestCase):
                       [0, 1, 1],
                       [0, 0, 1]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), * csc_result)
+        result = csc_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(m, result))
 
     def test_dense_ones_matrix(self):
@@ -99,6 +99,38 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 25, -30, 0],
                                     [0, 0, 2, 0],
                                     [0, 0, 0, 1]])
+        csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
+        result = csc_to_matrix(len(m[0]), *csc_result)
+        self.assertTrue(np.allclose(expected_result, result))
+
+    def test_matrix_6(self):
+        m = np.array([[8, 8, 0, 0, 0],
+                      [0, 1, 3, 0, 8],
+                      [-8, 0, 1, 1, 0],
+                      [0, 0, 0, 1, 0],
+                      [0, 4, 0, 0, -8]])
+        expected_result = np.array([[8, 8, 0, 0, 0],
+                                    [0, 1, 3, 0, 8],
+                                    [0, 0, -23, 1, -64],
+                                    [0, 0, 0, 1, 0],
+                                    [0, 0, 0, 0, -152/23]])
+        csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
+        result = csc_to_matrix(len(m[0]), *csc_result)
+        self.assertTrue(np.allclose(expected_result, result))
+
+    def test_matrix_7(self):
+        m = np.array([[ 1,  0,  0,  8],
+                      [ 0,  1,  5, -3],
+                      [ 0,  8,  1,  0],
+                      [ 0,  9,  0,  1]])
+        expected_result = np.array([[ 1,  0,  0,  8],
+                                    [ 0,  1,  5, -3],
+                                    [ 0,  0,-39,  24],
+                                    [ 0,  0,  0,  4/13]])
+        csc = csc_matrix(m)                                                
+        B = la.splu(csc, permc_spec='NATURAL', diag_pivot_thresh=0,
+                        options={"SymmetricMode": True})
+        B.U.sort_indices()
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
         result = csc_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
