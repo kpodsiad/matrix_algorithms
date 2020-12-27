@@ -28,7 +28,7 @@ class CSCTestCase(unittest.TestCase):
                       [0, 1, 1],
                       [0, 0, 1]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]) *csc_result)
+        result = csc_to_matrix(len(m[0]), * csc_result)
         self.assertTrue(np.allclose(m, result))
 
     def test_dense_ones_matrix(self):
@@ -73,6 +73,32 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 40, 0, 0],
                                     [0, 0, 1, 0],
                                     [0, 0, 0, -1]])
+        csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
+        result = csc_to_matrix(len(m[0]), *csc_result)
+        self.assertTrue(np.allclose(expected_result, result))
+
+    def test_matrix_4(self):
+        m = np.array([[2, 0, 0, 2],
+                      [0, 1, 0, 0],
+                      [-6, 0, 1, 0],
+                      [-4, 0, 0, 1]])
+        expected_result = np.array([[2, 0, 0, 2],
+                                    [0, 1, 0, 0],
+                                    [0, 0, 1, 6],
+                                    [0, 0, 0, 5]])
+        csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
+        result = csc_to_matrix(len(m[0]), *csc_result)
+        self.assertTrue(np.allclose(expected_result, result))
+
+    def test_matrix_5(self):
+        m = np.array([[1, -4, 5, 0],
+                      [6, 1, 0, 0],
+                      [-5, 0, 1, 0],
+                      [0, 3, 0, 1]])
+        expected_result = np.array([[1, -4, 5, 0],
+                                    [0, 25, -30, 0],
+                                    [0, 0, 2, 0],
+                                    [0, 0, 0, 1]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
         result = csc_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
