@@ -1,8 +1,9 @@
-import numpy as np
-from scipy.sparse import coo_matrix, csc_matrix, random, identity
 import os
+
+import numpy as np
+
+from lab3.lab3_program import csc_to_coordinate_format
 from quicksort import quicksort
-import scipy.sparse.linalg as la
 
 os.system('clear')
 
@@ -38,7 +39,8 @@ def coo_to_csc(N, col, row, data):
 def coo_gauss_elimination(N, coo):
     col, row_coo, data_coo = coo
     colptr, row, data = coo_to_csc(N, col, row_coo, data_coo)
-    return csc_gauss_elimination(N, colptr, row, data)
+    colptr, row, data = csc_gauss_elimination(N, colptr, row, data)
+    return csc_to_coordinate_format(data, row, colptr)
 
 
 def csc_gauss_elimination(N, colptr, row, data):
@@ -98,75 +100,3 @@ def csc_gauss_elimination(N, colptr, row, data):
     row, data = row[:k], data[:k]
 
     return colptr, row, data
-
-# N = 3
-# density = 0.8
-# A = csc_matrix(random(N, N, density=density, dtype="int"))
-
-# c,r,d = coo_to_csc(3, np.array([1,0,0,2,0,1,2]), np.array([2,0,1,0,0,1,2]), np.array([3,3,4,2,-2,1,1]))
-
-# col  = np.array([0,2,4,6])
-# row  = np.array([0,1,1,2,0,2])
-# data = np.array([1,4,3,1,2,1])
-# D = np.array([[1,9,3,5,11,7],
-#               [0,4,8,2,10,6]])
-
-# print(csc_gauss_elimination(N, c, r, d))
-
-# N = 5
-# density = 0.3
-# coo = coo_matrix(random(N, N, density=density, dtype="int") + identity(N))
-# coo = coo_matrix(np.array(
-# ))
-# csc = coo.tocsc()
-# c, r, d = coo_to_csc(N, coo.col.copy(), coo.row.copy(), coo.data.copy())
-#
-# assert np.array_equal(c, csc.indptr), "colptr is not equal"
-# assert np.array_equal(r, csc.indices), "row is not equal"
-# assert np.array_equal(d, csc.data), "data is not equal"
-#
-# B = la.splu(csc, permc_spec='NATURAL', diag_pivot_thresh=0, options={"SymmetricMode": True})
-# B.U.sort_indices()
-# col, row, data = csc_gauss_elimination(N, c.copy(), r.copy(), d.copy())
-#
-# assert np.array_equal(col, B.U.indptr), "colptr is not equal #2"
-# assert np.array_equal(row, B.U.indices), "row is not equal #2"
-# print(csc.toarray())
-# print(col, B.U.indptr)
-# assert np.allclose(data, B.U.data), "data is not equal #2"
-#
-# i = 100
-# while i < 50:
-#     clear()
-#     coo = coo_matrix(random(N, N, density=density, dtype="int") + identity(N))
-#     csc = coo.tocsc()
-#     print(csc.toarray())
-#     c, r, d = coo_to_csc(N, coo.col.copy(), coo.row.copy(), coo.data.copy())
-#     if not np.array_equal(c, csc.indptr):
-#         print("colptr is not equal")
-#         i = 201
-#     if not np.array_equal(r, csc.indices):
-#         print("row is not equal")
-#         i = 201
-#     if not np.array_equal(d, csc.data):
-#         print("data is not equal")
-#         i = 201
-#     #
-#     B = la.splu(csc, permc_spec='NATURAL', diag_pivot_thresh=0,
-#                 options={"SymmetricMode": True})
-#     B.U.sort_indices()
-#
-#     col, row, data = csc_gauss_elimination(N, c.copy(), r.copy(), d.copy())
-#     #
-#     if not np.array_equal(col, B.U.indptr):
-#         print("colptr is not equal #2", i)
-#         i = 201
-#     if not np.array_equal(row, B.U.indices):
-#         print("row is not equal #2", i)
-#         i = 201
-#     if not np.allclose(data, B.U.data):
-#         print("data is not equal #2", i)
-#         i = 201
-#     #
-#     i += 1
-# #

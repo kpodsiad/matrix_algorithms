@@ -1,16 +1,19 @@
 import unittest
+
 import numpy as np
-from scipy.sparse import coo_matrix, csc_matrix
-from lab4_program import csc_gauss_elimination, coo_gauss_elimination
 import scipy.sparse.linalg as la
+from scipy.sparse import coo_matrix, csc_matrix
+
+from lab4_program import coo_gauss_elimination
+
 
 def matrix_to_coo(matrix):
     a = coo_matrix(matrix)
     return a.col, a.row, a.data
 
 
-def csc_to_matrix(N, colptr, row, data):
-    return csc_matrix((data, row, colptr), shape=(N, N)).toarray()
+def coo_to_matrix(N, data, row, col):
+    return coo_matrix((data, (row, col)), shape=(N, N)).toarray()
 
 
 class CSCTestCase(unittest.TestCase):
@@ -19,8 +22,8 @@ class CSCTestCase(unittest.TestCase):
         m = np.array([[1, 0, 0],
                       [0, 1, 0],
                       [0, 0, 1]])
-        csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        coo_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
+        result = coo_to_matrix(len(m[0]), *coo_result)
         self.assertTrue(np.allclose(m, result))
 
     def test_matrix_that_has_value_in_every_column(self):
@@ -28,7 +31,7 @@ class CSCTestCase(unittest.TestCase):
                       [0, 1, 1],
                       [0, 0, 1]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(m, result))
 
     def test_dense_ones_matrix(self):
@@ -39,7 +42,7 @@ class CSCTestCase(unittest.TestCase):
                                     [0, -3, -6],
                                     [0, 0, 2]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
 
     def test_matrix_1(self):
@@ -50,7 +53,7 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 28, 6],
                                     [0, 0, 7]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
 
     def test_matrix_2(self):
@@ -61,7 +64,7 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 8, -3],
                                     [0, 0, 4]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
 
     def test_matrix_3(self):
@@ -74,7 +77,7 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 0, 1, 0],
                                     [0, 0, 0, -1]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
 
     def test_matrix_4(self):
@@ -87,7 +90,7 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 0, 1, 6],
                                     [0, 0, 0, 5]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
 
     def test_matrix_5(self):
@@ -100,7 +103,7 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 0, 2, 0],
                                     [0, 0, 0, 1]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
 
     def test_matrix_6(self):
@@ -113,25 +116,24 @@ class CSCTestCase(unittest.TestCase):
                                     [0, 1, 3, 0, 8],
                                     [0, 0, -23, 1, -64],
                                     [0, 0, 0, 1, 0],
-                                    [0, 0, 0, 0, -152/23]])
+                                    [0, 0, 0, 0, -152 / 23]])
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
 
     def test_matrix_7(self):
-        m = np.array([[ 1,  0,  0,  8],
-                      [ 0,  1,  5, -3],
-                      [ 0,  8,  1,  0],
-                      [ 0,  9,  0,  1]])
-        expected_result = np.array([[ 1,  0,  0,  8],
-                                    [ 0,  1,  5, -3],
-                                    [ 0,  0,-39,  24],
-                                    [ 0,  0,  0,  4/13]])
-        csc = csc_matrix(m)                                                
+        m = np.array([[1, 0, 0, 8],
+                      [0, 1, 5, -3],
+                      [0, 8, 1, 0],
+                      [0, 9, 0, 1]])
+        expected_result = np.array([[1, 0, 0, 8],
+                                    [0, 1, 5, -3],
+                                    [0, 0, -39, 24],
+                                    [0, 0, 0, 4 / 13]])
+        csc = csc_matrix(m)
         B = la.splu(csc, permc_spec='NATURAL', diag_pivot_thresh=0,
-                        options={"SymmetricMode": True})
+                    options={"SymmetricMode": True})
         B.U.sort_indices()
         csc_result = coo_gauss_elimination(len(m[0]), matrix_to_coo(m))
-        result = csc_to_matrix(len(m[0]), *csc_result)
+        result = coo_to_matrix(len(m[0]), *csc_result)
         self.assertTrue(np.allclose(expected_result, result))
-
